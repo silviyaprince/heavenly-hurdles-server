@@ -6,12 +6,17 @@ const allCategories=[ "Hiking&Trekking", "Camping","Skiing&Snowboarding", "RockC
 
 allCategories.map((category)=>{
   router.get(`/${category}`, async (req, res) => {
+    try{
     const {  rating } = req.query;
     if (req.query.rating) {
       req.query.rating = +req.query.rating;
     }
     const product = await getAllProducts(category, req);
+    
     res.send(product);
+  }catch(err){
+    console.log(err)
+  }
   });
 })
 

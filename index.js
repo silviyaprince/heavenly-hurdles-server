@@ -2,11 +2,13 @@ import express from "express";
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 import { productsRouter } from "./routes/products.js";
+import { usersRouter } from "./routes/users.js";
 const app = express();
 const PORT = 8000;
 app.use(express.json());
-//process.env.MONGO_URL;
-const MONGO_URL = "mongodb://127.0.0.1:27017";
+//"mongodb://127.0.0.1:27017";
+//
+const MONGO_URL = process.env.MONGO_URL;
 
 async function createConnection() {
   const client = new MongoClient(MONGO_URL);
@@ -22,8 +24,7 @@ app.get("/", (req, res) => {
 });
 
 
-
-
+app.use("/users",usersRouter)
+app.use("/products",productsRouter)
 app.listen(PORT,console.log("server started on port",PORT))
 
-app.use("/products",productsRouter)
