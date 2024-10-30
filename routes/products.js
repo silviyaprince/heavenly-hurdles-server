@@ -38,9 +38,9 @@ allCategories.map((category)=>{
 })
 
 allCategories.map((category)=>{
-  router.delete(`/${category}/:id`,async(req,res)=>{
-    const{id}=req.params;
-    const product=await deleteProductById(category, id);
+  router.delete(`/${category}`,async(req,res)=>{
+    
+    const product=await deleteProduct(category);
     res.send(product)
   })
   

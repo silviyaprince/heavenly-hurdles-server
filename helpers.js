@@ -6,8 +6,8 @@ async function updateProductById(category, id, updateProduct) {
     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
   }
   
-  async function deleteProductById(category, id) {
-    return await client.db("Inventory").collection(`${category}`).deleteOne({ id: id });
+  async function deleteProduct(category) {
+    return await client.db("Inventory").collection(`${category}`).deleteMany({ id: id });
   }
   
   async function getProductById(category, id) {
