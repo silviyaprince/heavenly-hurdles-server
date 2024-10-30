@@ -15,7 +15,7 @@ async function updateProductById(category, id, updateProduct) {
   }
   
   async function addProducts(category, newProduct) {
-    return await client.db("Inventory").collection(`${category}`).insertMany(newProduct);
+    return await client.db("Inventory").collection(`${category}`).insertOne(newProduct);
   }
   
   async function getAllProducts(category, req) {
