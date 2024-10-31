@@ -6,10 +6,13 @@ async function updateProductById(category, id, updateProduct) {
     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
   }
   
-  async function deleteProduct(category) {
-    return await client.db("Inventory").collection(`${category}`).deleteMany({ id: id });
-  }
+  // async function deleteProductById(category,id) {
+  //   return await client.db("Inventory").collection(`${category}`).deleteOne({ id: id });
+  // }
   
+  async function deleteProducts(category, ids) {
+    return await client.db("Inventory").collection(`${category}`).deleteMany({ id: { $in: ids } });
+  }
   async function getProductById(category, id) {
     return await client.db("Inventory").collection(`${category}`).findOne({ id: id });
   }
@@ -36,4 +39,5 @@ async function updateProductById(category, id, updateProduct) {
     return await client.db("Inventory").collection("users").findOne({username:username});
   }
   
-export {getAllProducts,getProductById,updateProductById,deleteProductById,addProducts,genPassword,getUserByName,createUser,getAllUser}  
+export {getAllProducts,getProductById,updateProductById,addProducts,genPassword,getUserByName,createUser,getAllUser,deleteProducts}  
+//deleteProductById
