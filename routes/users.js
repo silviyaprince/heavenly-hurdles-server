@@ -4,9 +4,10 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {genPassword,createUser,getUserByName,getAllUser} from "../helpers.js";
 import { auth } from "../middleware/auth.js";
+import { requireRole } from "../middleware/requireRole.js";
 
 router.post("/signup",async(req,res)=>{
-    const {username,password}=req.body;
+    const {username,password,role=customer}=req.body;
     const isUserExist=await getUserByName(username)
     if(isUserExist){
         res.status(400).send({message:"username already exists"})
@@ -23,7 +24,7 @@ router.post("/signup",async(req,res)=>{
 })
 
 
-router.post("/login",auth,async(req,res)=>{
+router.post("/login",async(req,res)=>{
     const {username,password}=req.body;
     const userFromDb=await getUserByName(username)
     if(!userFromDb){
@@ -36,15 +37,17 @@ router.post("/login",auth,async(req,res)=>{
         res.status(400).send({message:"invalid credentials"})
         return
     }
-    const token=jwt.sign({id:userFromDb._id},process.env.secret_key)
+    const token=jwt.sign({id:userFromDb._id, role: userFromDb.role},process.env.secret_key,{ expiresIn: "1h" })
     res.send({message:"login successful",token:token})
 
 
 })
 
-router.get("/get-users",auth,async(req,res)=>{
+router.get("/get-users",requireRole("admin"),async(req,res)=>{
     const result=await getAllUser()
     res.send(result)
 })
+
+
 
 export const usersRouter=router

@@ -2,9 +2,9 @@
 import {client} from "./index.js";
 import bcrypt from "bcrypt";
 
-async function updateProductById(category, id, updateProduct) {
-    return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
-  }
+// async function updateProductById(category, id, updateProduct) {
+//     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
+//   }
   
   // async function deleteProductById(category,id) {
   //   return await client.db("Inventory").collection(`${category}`).deleteOne({ id: id });
@@ -13,6 +13,11 @@ async function updateProductById(category, id, updateProduct) {
   async function deleteProducts(category, ids) {
     return await client.db("Inventory").collection(`${category}`).deleteMany({ id: { $in: ids } });
   }
+
+  // async function updateProducts(category, bulkOperations) {
+  //   return await client.db("Inventory").collection(`${category}`).bulkWrite(bulkOperations);
+  // }
+
   async function getProductById(category, id) {
     return await client.db("Inventory").collection(`${category}`).findOne({ id: id });
   }
@@ -29,8 +34,8 @@ async function updateProductById(category, id, updateProduct) {
     const hashedPassword=await bcrypt.hash(password,salt)
     return hashedPassword
   }
-  async function createUser(username,hashedPassword) {
-    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword});
+  async function createUser(username,hashedPassword,role) {
+    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword,role});
   }
   async function getAllUser() {
     return await client.db("Inventory").collection("users").find().toArray();
@@ -39,5 +44,5 @@ async function updateProductById(category, id, updateProduct) {
     return await client.db("Inventory").collection("users").findOne({username:username});
   }
   
-export {getAllProducts,getProductById,updateProductById,addProducts,genPassword,getUserByName,createUser,getAllUser,deleteProducts}  
+export {getAllProducts,getProductById,addProducts,genPassword,getUserByName,createUser,getAllUser,deleteProducts}  
 //deleteProductById
