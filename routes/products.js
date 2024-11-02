@@ -9,7 +9,6 @@ import {
   deleteProducts,
   
 } from "../helpers.js";
-import { requireRole } from "../middleware/requireRole.js";
 
 const allCategories = [
   "Hiking&Trekking",

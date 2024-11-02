@@ -4,8 +4,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import {genPassword,createUser,getUserByName,getAllUser} from "../helpers.js";
 import { auth } from "../middleware/auth.js";
-import { requireRole } from "../middleware/requireRole.js";
-
+import { verifyToken } from "../middleware/verifyToken.js";
+import { authorizeRole } from "../middleware/authorizeRole.js";
 router.post("/signup",async(req,res)=>{
     const {username,password,role=customer}=req.body;
     const isUserExist=await getUserByName(username)
@@ -24,11 +24,11 @@ router.post("/signup",async(req,res)=>{
 })
 
 
-router.post("/login",async(req,res)=>{
+router.post("/login" ,  async(req,res)=>{
     const {username,password}=req.body;
     const userFromDb=await getUserByName(username)
     if(!userFromDb){
-        res.status.send({message:"invalid credentials"})
+        res.status(400).send({message:"invalid credentials"})
         return
     }
     const storedDbPassword=userFromDb.password;
@@ -43,7 +43,7 @@ router.post("/login",async(req,res)=>{
 
 })
 
-router.get("/get-users",requireRole("admin"),async(req,res)=>{
+router.get("/get-users",verifyToken,authorizeRole( "admin" ),async(req,res)=>{
     const result=await getAllUser()
     res.send(result)
 })
