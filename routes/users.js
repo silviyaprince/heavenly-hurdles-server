@@ -7,19 +7,22 @@ import { auth } from "../middleware/auth.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 router.post("/signup",async(req,res)=>{
-    const {username,password,role=customer}=req.body;
+    const {username,password}=req.body;
+    console.log(req.body)
     const isUserExist=await getUserByName(username)
+    console.log("User exists:", isUserExist);
     if(isUserExist){
-        res.status(400).send({message:"username already exists"})
+        res.status(400).send({error:"username already exists"})
         return
     }
     if(!/^(?=.*?[0-9])(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[!@#$%^&*()]).{8,}$/g.test(password)){
-        res.status(400).send({message:"password doesnt match"})
+        res.status(400).send({error:"password doesnt match"})
         return
     }
 
     const hashedPassword=await genPassword(password)
     const result=await createUser(username,hashedPassword)
+    res.status(201).json({message:"successfully created"})
     res.send(result)
 })
 
