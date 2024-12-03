@@ -34,15 +34,17 @@ import bcrypt from "bcrypt";
     const hashedPassword=await bcrypt.hash(password,salt)
     return hashedPassword
   }
-  async function createUser(username,hashedPassword,role) {
-    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword,role});
+  async function createUser(username,hashedPassword,email,country,street,city,state,postalCode) {
+    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword,email:email,country:country,street:street,state:state,city:city,postalCode:postalCode,role:"customer"});
   }
   async function getAllUser() {
     return await client.db("Inventory").collection("users").find().toArray();
   }
-  async function getUserByName(username) {
-    return await client.db("Inventory").collection("users").findOne({username:username});
+  async function getUserByEmail(email) {
+    return await client.db("Inventory").collection("users").findOne({email:email});
   }
   
-export {getAllProducts,getProductById,addProducts,genPassword,getUserByName,createUser,getAllUser,deleteProducts}  
+
+
+export {getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
 //deleteProductById

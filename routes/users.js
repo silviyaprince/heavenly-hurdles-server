@@ -2,17 +2,17 @@ import express from "express";
 const router=express.Router();
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {genPassword,createUser,getUserByName,getAllUser} from "../helpers.js";
+import {genPassword,createUser,getUserByEmail,getAllUser} from "../helpers.js";
 import { auth } from "../middleware/auth.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { authorizeRole } from "../middleware/authorizeRole.js";
 router.post("/signup",async(req,res)=>{
-    const {username,password}=req.body;
+    const {username,password,email,country,street,city,state,postalCode}=req.body;
     console.log(req.body)
-    const isUserExist=await getUserByName(username)
+    const isUserExist=await getUserByEmail(email)
     console.log("User exists:", isUserExist);
     if(isUserExist){
-        res.status(400).send({error:"username already exists"})
+        res.status(400).send({error:"user already exists"})
         return
     }
     if(!/^(?=.*?[0-9])(?=.*?[a-z])(?=.*?[A-Z])(?=.*?[!@#$%^&*()]).{8,}$/g.test(password)){
@@ -21,15 +21,15 @@ router.post("/signup",async(req,res)=>{
     }
 
     const hashedPassword=await genPassword(password)
-    const result=await createUser(username,hashedPassword)
+    const result=await createUser(username,hashedPassword,email,country,street,city,state,postalCode)
     res.status(201).json({message:"successfully created"})
     res.send(result)
 })
 
 
 router.post("/login" ,  async(req,res)=>{
-    const {username,password}=req.body;
-    const userFromDb=await getUserByName(username)
+    const {email,password}=req.body;
+    const userFromDb=await getUserByEmail(email)
     if(!userFromDb){
         res.status(400).send({message:"invalid credentials"})
         return
@@ -51,6 +51,18 @@ router.get("/get-users",verifyToken,authorizeRole( "admin" ),async(req,res)=>{
     res.send(result)
 })
 
+router.get("/address",async(req,res)=>{
+    try{
+const address=await getUserAddress(req)
+if(!address){
+    return res.status(404).json({error:"no address available"})
 
+}
+res.status(200).json({data:address})
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error:"server error"})
+    }
+})
 
 export const usersRouter=router
