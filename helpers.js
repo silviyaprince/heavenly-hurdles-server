@@ -2,6 +2,7 @@
 import {client} from "./index.js";
 import bcrypt from "bcrypt";
 
+import { ObjectId } from 'mongodb';
 // async function updateProductById(category, id, updateProduct) {
 //     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
 //   }
@@ -44,7 +45,15 @@ import bcrypt from "bcrypt";
     return await client.db("Inventory").collection("users").findOne({email:email});
   }
   
+  async function getUserData(userId) {
+    return await client.db('Inventory').collection('users').findOne({ _id: userId });
+  }
+  
 
+  // async function findUserById(userId) {
+  //   return await client.db("Inventory").collection("users").findOne({userId:_id});
+  // }
+ 
 
-export {getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
+export {getUserData,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
 //deleteProductById
