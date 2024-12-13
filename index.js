@@ -4,6 +4,7 @@ import "dotenv/config";
 import cors from "cors";
 
 
+
 import { productsRouter } from "./routes/products.js";
 import { usersRouter } from "./routes/users.js";
 const app = express();
@@ -22,7 +23,7 @@ async function createConnection() {
 }
 
 export const client = await createConnection();
-
+// dataBaseConnection();
 app.get("/", (req, res) => {
   res.send("hello everyone😄😄😁");
 });

@@ -2,17 +2,18 @@ import express from "express";
 const router = express.Router();
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { ObjectId } from "mongodb";
+// import { ObjectId } from "mongodb";
 import {
   genPassword,
+  insertOrder,
   createUser,
   getUserByEmail,
+  getUserById,
+  getOrders,
   getAllUser,
-  getUserData,
+  getUserDetail,
 } from "../helpers.js";
-import { auth } from "../middleware/auth.js";
-import { verifyToken } from "../middleware/verifyToken.js";
-import { authorizeRole } from "../middleware/authorizeRole.js";
+import { isAuthenticated } from "../middleware/auth.js";
 router.post("/signup", async (req, res) => {
   const {
     username,
@@ -23,6 +24,7 @@ router.post("/signup", async (req, res) => {
     city,
     state,
     postalCode,
+    phonenumber,
   } = req.body;
   console.log(req.body);
   const isUserExist = await getUserByEmail(email);
@@ -49,7 +51,8 @@ router.post("/signup", async (req, res) => {
     street,
     city,
     state,
-    postalCode
+    postalCode,
+    phonenumber
   );
   res.status(201).json({ message: "successfully created" });
 });
@@ -73,7 +76,7 @@ router.post("/login", async (req, res) => {
       process.env.secret_key,
       { expiresIn: "1h" }
     );
-console.log(userFromDb.role)
+    console.log(userFromDb.role);
     res.status(200).send({
       message: "Login successful",
       token,
@@ -85,27 +88,76 @@ console.log(userFromDb.role)
   }
 });
 
-router.get(
-  "/get-users",
-  verifyToken,
-  authorizeRole("admin"),
-  async (req, res) => {
-    const result = await getAllUser();
-    res.send(result);
-  }
-);
+// router.get(
+//   "/get-users",
 
-router.get('/user', auth, async (req, res) => {
+//   async (req, res) => {
+//     const result = await getAllUser();
+//     res.send(result);
+//   }
+// );
+
+router.get("/user", isAuthenticated, async (req, res) => {
   try {
-    const user = await getUserData(req.user._id); // Get user data by user ID
+    const user = await getUserById(req.user._id); // Get user data by user ID
+    console.log(user);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
     res.status(200).json({ data: user });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: "Server error" });
   }
 });
-  
+
+router.post("/orders", isAuthenticated, async (req, res) => {
+  try {
+    const { userId, products, totalAmount } = req.body;
+
+    // Generate random order ID
+    const orderId = Math.random().toString(36).substring(2, 10).toUpperCase();
+
+    // Fetch user details (assuming user data is stored in `users` collection)
+    const user = await getUserById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Prepare the order data
+    const order = {
+      orderId,
+      userId,
+      username: user.username,
+      email: user.email,
+      products,
+      totalAmount,
+      orderDate: new Date(),
+    };
+
+    // Insert the order into the `orders` collection
+    await insertOrder(order);
+
+    res.status(201).json({ message: "Order placed successfully", order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to place order" });
+  }
+});
+
+
+
+router.get("/ordersdata",isAuthenticated, async (req, res) => {
+  try {
+    const orders = await getOrders();
+    res.status(200).json({ orders });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
 export const usersRouter = router;
+
+

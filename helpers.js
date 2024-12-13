@@ -1,7 +1,7 @@
 
 import {client} from "./index.js";
 import bcrypt from "bcrypt";
-
+// import { User } from "./models/user.js";
 import { ObjectId } from 'mongodb';
 // async function updateProductById(category, id, updateProduct) {
 //     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
@@ -35,8 +35,8 @@ import { ObjectId } from 'mongodb';
     const hashedPassword=await bcrypt.hash(password,salt)
     return hashedPassword
   }
-  async function createUser(username,hashedPassword,email,country,street,city,state,postalCode) {
-    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword,email:email,country:country,street:street,state:state,city:city,postalCode:postalCode,role:"customer"});
+  async function createUser(username,hashedPassword,email,country,street,city,state,postalCode,phonenumber) {
+    return await client.db("Inventory").collection("users").insertOne({username:username,password:hashedPassword,email:email,country:country,street:street,state:state,city:city,postalCode:postalCode,phonenumber:phonenumber,role:"customer"});
   }
   async function getAllUser() {
     return await client.db("Inventory").collection("users").find().toArray();
@@ -45,15 +45,31 @@ import { ObjectId } from 'mongodb';
     return await client.db("Inventory").collection("users").findOne({email:email});
   }
   
-  async function getUserData(userId) {
-    return await client.db('Inventory').collection('users').findOne({ _id: userId });
+async function getUserDetail(req){
+  return await client.db("Inventory").collection("users").findOne({user:req.user._id});
   }
   
 
   // async function findUserById(userId) {
   //   return await client.db("Inventory").collection("users").findOne({userId:_id});
   // }
- 
+ async  function getUserById(id){
+  return await client.db("Inventory").collection("users").findOne({ _id: new ObjectId(id)})
+  
+}
+const generateToken=(id)=>{
+  return jsonwebtoken.sign({id},process.env.SECRET_KEY)
+}
 
-export {getUserData,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
+
+
+
+async function insertOrder(order) {
+  await client.db("Inventory").collection("orders").insertOne(order);
+}
+
+async function getOrders() {
+  return await client.db("Inventory").collection("orders").find().toArray();
+}
+export {getOrders,insertOrder,generateToken,getUserById,getUserDetail,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
 //deleteProductById

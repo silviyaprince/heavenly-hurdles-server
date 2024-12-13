@@ -58,6 +58,8 @@ allCategories.map((category) => {
   });
 });
 
+
+
 allCategories.map((category) => {
   router.post(`/${category}`, async (req, res) => {
     const newProduct = req.body;
@@ -110,32 +112,68 @@ allCategories.map((category) => {
 //   });
 // });
 
+// allCategories.map((category) => {
+//   router.put(`${category}/bulkupdate`, async (req, res) => {
+//     const { ids, updateFields } = req.body;
+  
+//     if (!ids || ids.length === 0) {
+//       return res.status(400).json({ error: 'No product IDs provided for bulk update.' });
+//     }
+  
+//     try {
+//       // Update the products with the provided fields
+//       const result = await client.db("Inventory").collection(`${category}`).updateMany(
+//         { _id: { $in: ids } },
+//         { $set: updateFields }
+//       );
+  
+//       if (result.modifiedCount > 0) {
+//         res.json({ message: 'Bulk update successful', modifiedCount: result.modifiedCount });
+//       } else {
+//         res.status(404).json({ error: 'No products were updated.' });
+//       }
+//     } catch (error) {
+//       console.error('Error in bulk update:', error);
+//       res.status(500).json({ error: 'An error occurred during the bulk update.' });
+//     }
+//   });
+  
+// });
 allCategories.map((category) => {
-  router.put(`${category}/bulkupdate`, async (req, res) => {
-    const { ids, updateFields } = req.body;
-  
-    if (!ids || ids.length === 0) {
-      return res.status(400).json({ error: 'No product IDs provided for bulk update.' });
+router.put(`${category}/bulkupdate`, async (req, res) => {
+  const { ids, updateFields } = req.body;
+  console.log(`Bulk update endpoint hit for category: ${category}`);
+
+  if (!ids || ids.length === 0) {
+    return res.status(400).json({ error: 'No product IDs provided for bulk update.' });
+  }
+
+  try {
+    const operations = ids.map((id) => {
+      const updates = updateFields[id];
+      return client
+        .db("Inventory")
+        .collection(category)
+        .updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updates } // Individual updates for each product
+        );
+    });
+
+    const results = await Promise.all(operations);
+    const modifiedCount = results.reduce((count, result) => count + result.modifiedCount, 0);
+
+    if (modifiedCount > 0) {
+      res.json({ message: 'Bulk update successful', modifiedCount });
+    } else {
+      res.status(404).json({ error: 'No products were updated.' });
     }
-  
-    try {
-      // Update the products with the provided fields
-      const result = await client.db("Inventory").collection(`${category}`).updateMany(
-        { _id: { $in: ids } },
-        { $set: updateFields }
-      );
-  
-      if (result.modifiedCount > 0) {
-        res.json({ message: 'Bulk update successful', modifiedCount: result.modifiedCount });
-      } else {
-        res.status(404).json({ error: 'No products were updated.' });
-      }
-    } catch (error) {
-      console.error('Error in bulk update:', error);
-      res.status(500).json({ error: 'An error occurred during the bulk update.' });
-    }
-  });
-  
+  } catch (error) {
+    console.error('Error in bulk update:', error);
+    res.status(500).json({ error: 'An error occurred during the bulk update.' });
+  }
 });
+})
+
 
 export const productsRouter = router;
