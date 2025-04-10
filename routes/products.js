@@ -4,7 +4,7 @@ const router = express.Router();
 import {
   getAllProducts,
   getProductById,
- 
+ updateProductById,
   addProducts,
   deleteProducts,
   
@@ -103,14 +103,14 @@ allCategories.map((category) => {
   });
 });
 
-// allCategories.map((category) => {
-//   router.put(`/${category}/:id`, async (req, res) => {
-//     const { id } = req.params;
-//     const updateProduct = req.body;
-//     const result = await updateProductById(category, id, updateProduct);
-//     res.send(result);
-//   });
-// });
+allCategories.map((category) => {
+  router.put(`/${category}/:id`, async (req, res) => {
+    const { id } = req.params;
+    const updateProduct = req.body;
+    const result = await updateProductById(category, id, updateProduct);
+    res.send(result);
+  });
+});
 
 // allCategories.map((category) => {
 //   router.put(`${category}/bulkupdate`, async (req, res) => {

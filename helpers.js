@@ -1,11 +1,12 @@
 
 import {client} from "./index.js";
 import bcrypt from "bcrypt";
-// import { User } from "./models/user.js";
 import { ObjectId } from 'mongodb';
-// async function updateProductById(category, id, updateProduct) {
-//     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
-//   }
+
+
+async function updateProductById(category, id, updateProduct) {
+    return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
+  }
   
   // async function deleteProductById(category,id) {
   //   return await client.db("Inventory").collection(`${category}`).deleteOne({ id: id });
@@ -50,9 +51,7 @@ async function getUserDetail(req){
   }
   
 
-  // async function findUserById(userId) {
-  //   return await client.db("Inventory").collection("users").findOne({userId:_id});
-  // }
+  
  async  function getUserById(id){
   return await client.db("Inventory").collection("users").findOne({ _id: new ObjectId(id)})
   
@@ -71,5 +70,10 @@ async function insertOrder(order) {
 async function getOrders() {
   return await client.db("Inventory").collection("orders").find().toArray();
 }
-export {getOrders,insertOrder,generateToken,getUserById,getUserDetail,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts}  
+
+async function deleteOrderById(orderId) {
+  return await client.db("Inventory").collection("orders").deleteOne({ orderId }); // or {_id: orderId} if you use MongoDB ObjectIds
+}
+
+export {updateProductById,getOrders,insertOrder,generateToken,getUserById,getUserDetail,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts,deleteOrderById}  
 //deleteProductById
