@@ -69,8 +69,11 @@ allCategories.map((category) => {
 });
 
 allCategories.map((category) => {
+  console.log(category)
   router.get(`/${category}/:id`, async (req, res) => {
     const { id } = req.params;
+    console.log(id)
+
     const product = await getProductById(category, id);
     res.send(product);
   });
