@@ -21,7 +21,7 @@ async function updateProductById(category, id, updateProduct) {
   // }
 
   async function getProductById(category, id) {
-    return await client.db("Inventory").collection(`${category}`).findOne({ id: id });
+    return await client.db("Inventory").collection(`${category}`).findOne({ id: parseInt(id) });
   }
   
   async function addProducts(category, newProduct) {

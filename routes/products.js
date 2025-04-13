@@ -69,15 +69,32 @@ allCategories.map((category) => {
 });
 
 allCategories.map((category) => {
-  console.log(category)
+  
   router.get(`/${category}/:id`, async (req, res) => {
     const { id } = req.params;
-    console.log(id)
+    console.log(category,id)
 
     const product = await getProductById(category, id);
+    console.log(product)
     res.send(product);
   });
 });
+// allCategories.forEach((category) => {
+//   router.get(`/${category}/:id`, async (req, res) => {
+//     const { id } = req.params;
+// console.log(id)
+//     try {
+//       const product = await getProductById(category, id);
+//       if (!product) {
+//         return res.status(404).json({ error: "Product not found" });
+//       }
+//       res.json(product);
+//     } catch (err) {
+//       console.error("Error fetching product:", err);
+//       res.status(500).json({ error: "Server error" });
+//     }
+//   });
+// });
 
 // allCategories.map((category)=>{
 //   router.delete(`/${category}`,async(req,res)=>{
