@@ -23,15 +23,13 @@ const allCategories = [
   "Yoga",
   "Swimming",
   "Sailing",
-  "Surfing&BeachSports",
+  "Surfing & Beach Sports",
   "Badminton",
   "Tennis",
-  "Tabletennis",
+  "Table tennis",
   "Squash",
   "Football",
   "Basketball",
-  "Cricket",
-  "Volleyball",
   "Hockey",
   "Running",
   "Walking",
@@ -61,9 +59,10 @@ allCategories.map((category) => {
 
 
 allCategories.map((category) => {
-  router.post(`/${category}`, async (req, res) => {
+  router.post(`/${encodeURIComponent(category)}`, async (req, res) => {
     const newProduct = req.body;
     const result = await addProducts(category, newProduct);
+    console.log(result)
     res.send(result);
   });
 });
