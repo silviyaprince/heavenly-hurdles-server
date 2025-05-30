@@ -194,7 +194,7 @@ router.post("/resetpassword", async (req, res) => {
 
   const transporter = nodemailer.createTransport({
     host: "smtp.zoho.in",
-    port: 465,
+    port: process.env.portno,
     secure: true,
     auth: {
       user: "silviya.prince16@zohomail.in",
