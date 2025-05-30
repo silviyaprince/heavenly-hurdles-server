@@ -2,8 +2,13 @@ import express from "express";
 const router = express.Router();
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import crypto from "crypto";
 // import { ObjectId } from "mongodb";
 import {
+  updateUserPasswordByToken,
+  getUserByResetToken,
+  updateUserResetToken,
   genPassword,
   insertOrder,
   createUser,
@@ -176,6 +181,84 @@ router.delete("/orders/:orderId", isAuthenticated, async (req, res) => {
     res.status(500).json({ error: "Failed to delete order" });
   }
 });
+
+//-----------
+
+router.post("/resetpassword", async (req, res) => {
+  const user = await getUserByEmail(req.body.email);
+  if (!user) {
+    return res.status(400).json({ error: "invalid credentials" });
+  }
+  const token = Math.random().toString(36).slice(-8);
+  await updateUserResetToken(req.body.email, token);
+
+  const transporter = nodemailer.createTransport({
+    host: "smtp.zoho.in",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "silviya.prince16@zohomail.in",
+      pass: process.env.PASS_KEY,
+    },
+  });
+  const resetLink = `http://localhost:3000/users/resetpassword/${token}`;
+  const message = {
+    from: "silviya.prince16@zohomail.in",
+    to: user.email,
+    subject: "PASSWORD RESET REQUEST",
+    text: `You are receiving this email because you requested for password reset of your account.\n\n.Use the following link  ${resetLink}  to reset password.`,
+  };
+
+  await transporter.sendMail(message, (err, info) => {
+    if (err) {
+      console.error("Error sending email:", err);
+      res.status(500).json({ error: "Error sending email" });
+    } else {
+      console.log("Email sent:", info.response);
+      res.status(200).json({ message: "Password reset email sent" });
+    }
+  });
+});
+
+router.get("/resetpassword/:token", async (req, res) => {
+  const { token } = req.params;
+
+  // Find the user by the token and ensuring it's still valid
+  const user = await getUserByResetToken(token);
+
+  if (!user) {
+    return res.status(400).json({ error: "Invalid or expired token." });
+  }
+
+  // If token is valid, proceed with showing the reset password form
+  res
+    .status(200)
+    .json({ message: "Token valid. You can now reset your password." });
+});
+
+router.post("/resetpassword/update", async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  const user = await getUserByResetToken(token);
+
+  if (!user) {
+    return res.status(400).json({ error: "Invalid or expired token." });
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+await updateUserPasswordByToken(token, hashedPassword);
+
+  res.status(200).json({ message: "Password has been reset successfully!" });
+});
+
+
+
+
+
+
+
 
 export const usersRouter = router;
 

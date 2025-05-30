@@ -4,9 +4,30 @@ import bcrypt from "bcrypt";
 import { ObjectId } from 'mongodb';
 
 
-async function updateProductById(category, id, updateProduct) {
-    return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
-  }
+// async function updateProductById(category, id, updateProduct) {
+//     return await client.db("Inventory").collection(`${category}`).updateOne({ id: id }, { $set: updateProduct });
+//   }
+
+
+async function updateProductById(category, id, updatedData) {
+  if ('_id' in updatedData) delete updatedData._id;
+
+  return (
+    await client
+      .db("Inventory")
+      .collection(category)
+      .findOneAndUpdate(
+        { _id: new ObjectId(id) }
+,
+        { $set: updatedData },
+        { returnDocument: "after" }
+      )
+  );
+}
+
+
+
+
   
   // async function deleteProductById(category,id) {
   //   return await client.db("Inventory").collection(`${category}`).deleteOne({ id: id });
@@ -75,5 +96,43 @@ async function deleteOrderById(orderId) {
   return await client.db("Inventory").collection("orders").deleteOne({ orderId }); // or {_id: orderId} if you use MongoDB ObjectIds
 }
 
-export {updateProductById,getOrders,insertOrder,generateToken,getUserById,getUserDetail,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts,deleteOrderById}  
+ async function updateUserResetToken(email, token) {
+  return await client.db("Inventory").collection("users").updateOne(
+    { email },
+    {
+      $set: {
+        resetPasswordToken: token,
+        resetPasswordExpires: Date.now() + 360000000,
+      },
+    }
+  );
+}
+
+async function getUserByResetToken(token) {
+  return await client.db("Inventory").collection("users").findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+}
+
+
+ async function updateUserPasswordByToken(token, hashedPassword) {
+  return await client.db("Inventory").collection("users").updateOne(
+    {
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    },
+    {
+      $set: {
+        password: hashedPassword,
+      },
+      $unset: {
+        resetPasswordToken: "",
+        resetPasswordExpires: "",
+      },
+    }
+  );
+}
+
+export {updateUserPasswordByToken,getUserByResetToken,updateUserResetToken,updateProductById,getOrders,insertOrder,generateToken,getUserById,getUserDetail,getAllProducts,getProductById,addProducts,genPassword,getUserByEmail,createUser,getAllUser,deleteProducts,deleteOrderById}  
 //deleteProductById

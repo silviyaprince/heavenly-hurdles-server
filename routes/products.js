@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-//deleteProductById,
+import { ObjectId } from 'mongodb';
 import {
   getAllProducts,
   getProductById,
@@ -17,9 +17,9 @@ const allCategories = [
   "RockClimbing",
   "Fishing",
   "HorseRiding",
-  "FitnessCardio",
-  "BodyBuilding",
-  "KidsSports",
+  "Fitness Cardio",
+  "Body Building",
+  "Kids Sports",
   "Yoga",
   "Swimming",
   "Sailing",
@@ -34,7 +34,7 @@ const allCategories = [
   "Running",
   "Walking",
   "Cycling",
-  "CycleServicing",
+  "Cycle Servicing",
   "Skating",
   "Skateboarding",
   "Scooter",
@@ -81,7 +81,11 @@ const allCategories = [
 ];
 
 allCategories.map((category) => {
-  router.get(`/${category}`, async (req, res) => {
+  router.get(`/${encodeURIComponent(category)}`, async (req, res) => {
+   
+    console.log("Category param:", category);
+
+
     try {
       const { rating } = req.query;
       if (req.query.rating) {
@@ -90,6 +94,7 @@ allCategories.map((category) => {
       const product = await getAllProducts(category, req);
 
       res.send(product);
+       console.log("Products found:", product.length);
     } catch (err) {
       console.log(err);
     }
@@ -162,12 +167,36 @@ allCategories.map((category) => {
   });
 });
 
+// allCategories.map((category) => {
+//   router.put(`/${category}/:id`, async (req, res) => {
+//     const { id } = req.params;
+//     const updateProduct = req.body;
+//     const result = await updateProductById(category, id, updateProduct);
+//     res.send(result);
+//   });
+// });
+
+
+
+// PUT /products/:category/:id
 allCategories.map((category) => {
-  router.put(`/${category}/:id`, async (req, res) => {
-    const { id } = req.params;
-    const updateProduct = req.body;
-    const result = await updateProductById(category, id, updateProduct);
-    res.send(result);
+  router.put(`/${encodeURIComponent(category)}/:id`, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedData = req.body;
+
+      console.log(`Updating product in category '${category}' with ID: ${id}`);
+      const result = await updateProductById(category, id, updatedData);
+console.log("put change",updatedData)
+      if (!result) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      res.status(200).json({ message: "Product updated successfully", product: result });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   });
 });
 
